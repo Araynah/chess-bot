@@ -6,6 +6,13 @@ class OpeningBook:
 
     def __init__(self, book_path=None):
 
+        """
+        Initialize the OpeningBook.
+        
+        Args:
+            book_path (str, optional): Path to the opening book file. If provided, the book is loaded.
+        """
+         
         self.book = {}  # Dictionary: FEN -> list of (move, weight) tuples
 
         if book_path:
@@ -16,7 +23,14 @@ class OpeningBook:
 
     def load_book(self, book_path):
 
-        """Load opening book from file"""
+        """
+        Load opening book from a file.
+        
+        This method uses a Polyglot book loading implementation.
+        
+        Args:
+            book_path (str): The file path to the opening book.
+        """
 
         # Polyglot book loading implementation
 
@@ -68,7 +82,16 @@ class OpeningBook:
 
     def get_move(self, board, variation=0.1):
 
-        """Get a move from the opening book for the current position"""
+        """
+        Get a move from the opening book for the current position.
+        
+        Args:
+            board: A chess board object (must have a .fen() method).
+            variation (float): Variation factor; if >0, occasionally choose a non-best move.
+        
+        Returns:
+            str: The chosen move in UCI notation, or None if no move is available.
+        """
 
         try:
 
@@ -210,8 +233,6 @@ def create_simple_book():
     add_line(["c4", "e5"])                      # Reversed Sicilian
 
     return book
-
-# At the bottom of book.py
 
 def update_opening_weights(book, game, game_result, player_color):
     """

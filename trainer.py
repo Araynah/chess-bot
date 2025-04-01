@@ -6,6 +6,12 @@ import copy
 from board import ChessBoard
 
 class SelfPlayTrainer:
+    """
+    A framework for self-play training of chess bots.
+    
+    The trainer runs multiple iterations where bots play against each other,
+    then analyzes and updates bot parameters based on performance.
+    """
 
     def init(self, bot_constructor, games_per_iteration=50, iterations=10):
 
@@ -41,7 +47,12 @@ class SelfPlayTrainer:
 
     def train(self):
 
-        """Run the complete self-play training process"""
+        """
+        Run the complete self-play training process.
+        
+        Returns:
+            The best performing ChessBot instance after training.
+        """
 
         for iteration in range(self.iterations):
 
@@ -59,21 +70,15 @@ class SelfPlayTrainer:
 
             results = self.play_match(self.best_bot, challenger_bot)
 
-           
-
             # Analyze results
 
             analysis = self.analyze_results(results)
 
             print(f"Iteration {iteration+1} results: {analysis}")
 
-           
-
             # Update the best bot if challenger performed better
 
             self.update_best_bot(challenger_bot, analysis)
-
-           
 
             # Store performance metrics
 
@@ -86,14 +91,18 @@ class SelfPlayTrainer:
                 "metrics": analysis
 
             })
-
-           
+  
 
         return self.best_bot
     
     def create_challenger(self):
 
-        """Create a challenger bot with slightly modified parameters"""
+        """
+        Create a challenger bot with slightly modified parameters.
+        
+        Returns:
+            A new ChessBot instance with tweaked evaluation parameters.
+        """
 
         challenger = self.bot_constructor()
 
@@ -131,7 +140,16 @@ class SelfPlayTrainer:
 
     def play_match(self, bot1, bot2):
 
-        """Play a series of games between two bots"""
+        """
+        Play a series of games between two bots.
+        
+        Args:
+            bot1: The first ChessBot instance.
+            bot2: The second ChessBot instance.
+        
+        Returns:
+            list: A list of dictionaries containing game results and statistics.
+        """
 
         results = []
 
@@ -193,13 +211,22 @@ class SelfPlayTrainer:
 
     def play_game(self, board, white_bot, black_bot, moves):
 
-        """Play a single game between two bots, return the result code"""
+        """
+        Play a single game between two bots and return the result code.
+        
+        Args:
+            board (ChessBoard): The chess board.
+            white_bot: The ChessBot playing as White.
+            black_bot: The ChessBot playing as Black.
+            moves (list): List to record the moves played during the game.
+        
+        Returns:
+            int: The result code (1 for White win, -1 for Black win, 0 for draw).
+        """
 
         move_count = 0
 
         position_history = {}
-
-       
 
         while not board.is_game_over():
 
@@ -273,7 +300,15 @@ class SelfPlayTrainer:
         
     def analyze_results(self, results):
 
-        """Analyze the match results"""
+        """
+        Analyze the match results to compute performance metrics.
+        
+        Args:
+            results (list): A list of game result dictionaries.
+        
+        Returns:
+            dict: Performance metrics such as win rates and average game length.
+        """
 
         bot1_wins = sum(1 for r in results if r["winner"] == "bot1")
 
@@ -325,7 +360,13 @@ class SelfPlayTrainer:
 
     def update_best_bot(self, challenger, analysis):
 
-        """Update the best bot if the challenger performed better"""
+        """
+        Update the best bot if the challenger performs better.
+        
+        Args:
+            challenger: The challenger ChessBot instance.
+            analysis (dict): Performance metrics from the match.
+        """
 
         # If challenger (bot2) won more than current best (bot1), adopt its parameters
 
@@ -349,7 +390,12 @@ class SelfPlayTrainer:
 
     def save_best_bot(self, filepath):
 
-        """Save the best bot's parameters to a file"""
+        """
+        Save the best bot's parameters to a file.
+        
+        Args:
+            filepath (str): The file path to save the parameters.
+        """
 
         params = {}
 
@@ -383,7 +429,12 @@ class SelfPlayTrainer:
 
     def save_training_history(self, filepath):
 
-        """Save the training history to a file"""
+        """
+        Save the training history to a file.
+        
+        Args:
+            filepath (str): The file path to save the training history.
+        """
 
         history = {
 

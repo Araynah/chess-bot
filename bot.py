@@ -7,6 +7,12 @@ from board import ChessBoard
 class ChessBot:
     
     def __init__(self,book_path=None):
+        """
+        Initialize the ChessBot with an optional opening book.
+        
+        Args:
+            book_path (str, optional): Path to the opening book file.
+        """
 
         self.book = OpeningBook(book_path)
 
@@ -15,6 +21,18 @@ class ChessBot:
         self.history_table = {}
 
     def choose_move(self, board, depth=4):
+        """
+        Select the best move for the current board state.
+        
+        First, check if an opening book move is available; if not, use the search algorithm.
+        
+        Args:
+            board: A ChessBoard object.
+            depth (int): Search depth for the minimax algorithm.
+        
+        Returns:
+            chess.Move: The selected move.
+        """
 
         # First check if we have a book move
 
@@ -45,11 +63,16 @@ class ChessBot:
     def evaluate_position(self, board):
 
         """
-
-        Evaluate the current position.
-
-        Positive values favor white, negative values favor black.
-
+        Evaluate the current board position.
+        
+        Positive values favor white; negative values favor black.
+        Evaluation considers material, pawn structure, king safety, and mobility.
+        
+        Args:
+            board: A ChessBoard object.
+        
+        Returns:
+            int: The evaluation score.
         """
 
         board_state = board.get_board_state()
@@ -82,6 +105,15 @@ class ChessBot:
         return score
 
     def evaluate_material(self, board):
+        """
+        Evaluate board material using standard piece values and a bishop pair bonus.
+        
+        Args:
+            board: A ChessBoard object.
+        
+        Returns:
+            int: Material evaluation score.
+        """
 
         board_state = board.get_board_state()
 
@@ -94,7 +126,7 @@ class ChessBot:
 
             }
 
-            # Count material
+        # Count material for white and black
 
         for piece in piece_values:
 
@@ -104,7 +136,7 @@ class ChessBot:
 
         
 
-        # Bishop pair bonus
+        # Add bishop pair bonus for each side
 
         if len(board_state.pieces(chess.BISHOP, True)) >= 2:
 
@@ -119,6 +151,15 @@ class ChessBot:
     
 
     def evaluate_mobility(self, board):
+        """
+        Evaluate the mobility of pieces by counting potential attacks.
+        
+        Args:
+            board: A ChessBoard object.
+        
+        Returns:
+            float: Mobility score.
+        """
         
         board_state = board.get_board_state()
 
@@ -132,6 +173,7 @@ class ChessBot:
             chess.KING: 0.2   
         }
 
+        # Evaluate mobility for both white and black
         for color in [True, False]:
             multiplier = 1 if color else -1  # Positive for White, negative for Black
             mobility_score = 0
@@ -148,6 +190,15 @@ class ChessBot:
 
 
     def evaluate_pawn_structure(self, board):
+        """
+        Evaluate pawn structure, applying penalties for isolated and doubled pawns.
+        
+        Args:
+            board: A ChessBoard object.
+        
+        Returns:
+            int: Pawn structure evaluation score.
+        """
 
         board_state = board.get_board_state()
 
@@ -196,7 +247,16 @@ class ChessBot:
     
     
     def evaluate_king_safety(self, board):
-
+        """
+        Evaluate king safety by assessing the pawn shield.
+        
+        Args:
+            board: A ChessBoard object.
+        
+        Returns:
+            int: King safety evaluation score.
+        """
+         
         board_state = board.get_board_state()
 
         score = 0
@@ -245,15 +305,25 @@ class ChessBot:
     def minimax(self, board, depth, alpha, beta, maximizing_player):
 
         """
-
-        Minimax implementation.
-
-        Returns (best_score, best_move)
-
+        Minimax implementation with alpha-beta pruning.
+        
+        Recursively searches moves and uses alpha-beta pruning to eliminate branches.
+        
+        Args:
+            board: A ChessBoard object.
+            depth (int): The search depth.
+            alpha (float): Alpha value for pruning.
+            beta (float): Beta value for pruning.
+            maximizing_player (bool): True if the current turn is for the maximizing player.
+        
+        Returns:
+            tuple: (best_score, best_move)
         """
+
         legal_moves = board.get_legal_moves()
         board_state = board.get_board_state()  # Current position
 
+        # Base case: if depth is 0 or game is over, evaluate the board
         if depth == 0 or board.is_game_over():
 
             return self.evaluate_position(board), None
@@ -320,12 +390,19 @@ class ChessBot:
 
 
     def get_move(self, board):
-
+        
         """
-
         Main method to select the best move.
-
+        
+        Uses the minimax search with a preset depth (e.g., 3).
+        
+        Args:
+            board: A ChessBoard object.
+        
+        Returns:
+            chess.Move: The best move found.
         """
+
         board_state = board.get_board_state()
         
         _, best_move = self.minimax(board, depth=3, alpha=float('-inf'), beta=float('inf'), maximizing_player=board_state.turn)
@@ -336,11 +413,13 @@ class ChessBot:
     def get_game_phase(board):
 
         """
-
-        Returns a value between 0 (endgame) and 256 (opening)
-
-        based on remaining material
-
+        Returns a value between 0 (endgame) and 256 (opening) based on remaining material.
+        
+        Args:
+            board: A ChessBoard object.
+        
+        Returns:
+            int: The game phase value.
         """
 
         piece_values = {
@@ -365,11 +444,15 @@ class ChessBot:
 def interpolate(mg_score, eg_score, phase):
 
     """
-
-    Interpolate between middlegame and endgame scores
-
-    based on game phase
-
+    Interpolate between middlegame and endgame scores based on game phase.
+    
+    Args:
+        mg_score (int): Middlegame score.
+        eg_score (int): Endgame score.
+        phase (int): Game phase value.
+    
+    Returns:
+        int: The interpolated evaluation score.
     """
 
     return ((mg_score * phase) + (eg_score * (256 - phase))) // 256
